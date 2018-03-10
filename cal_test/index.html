@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style type="text/css">
+	
+	<!--
+	
+		.clearfix { //這個東西好像是可以讓圖片不要溢出表格外 我從網路上看來的
+			overflow: auto;
+			zoom: 1;
+		}
+	
+		.td_c{
+			height : 100px;
+		}
+		
+		cell_mid{
+			height : 100px;
+		}
+		
+		#img1{
+			float : right; // 僅使用float來完成網頁是很常見的
+			
+		}
+		#equ_img{
+			float : right; 
+		}
+		#img2{
+			float : left;
+		}
+	
+	-->
+
+
+</style>
+
+<script language="JavaScript">
+
+var is_ordered;
+var test_set;
+
+var current_que = 0;
+var ans_showing = false;
+
+var q_num_diff = 5;
+var q_num_inte = 5;
+
+var img_name_col = new Array();
+
+function create_img_col(){
+
+	function push_diff(){
+		for (var i = 1; i <= q_num_diff; i++)
+			img_name_col.push("d" + i);
+	}
+	
+	function push_inte(){
+		for (var i = 1; i <= q_num_inte; i++)
+			img_name_col.push("i" + i);
+	}
+
+	function shuffle_col(){
+		for (let i = img_name_col.length - 1; i > 0; i--) { // let代表此變數只會在這個區塊中存在
+			const j = Math.floor(Math.random() * (i + 1)); // 有可能和自己互換
+			[img_name_col[i], img_name_col[j]] = [img_name_col[j], img_name_col[i]]; // 這是什麼特別的語法? 我從stack overflow抄來的
+		}
+	
+	}
+	
+	if(test_set == 0){
+		push_diff();
+		push_inte();
+	}else if(test_set == 1)
+		push_diff();
+	else if(test_set == 2)
+		push_inte();
+		
+	if(!is_ordered)
+		shuffle_col(img_name_col);
+	
+}
+
+function pre_que(){
+	if(current_que == 0)
+		return;
+	current_que--;
+	refresh_img();
+}
+
+function show_ans(){
+	ans_showing = true;
+	refresh_img();
+}
+
+function next_que(){
+
+	var que_number;
+	
+	switch(test_set){
+		case 0:
+			que_number = q_num_diff + q_num_inte;
+			break;
+		case 1:
+			que_number = q_num_diff;
+			break;
+		case 2:
+			que_number = q_num_inte;
+			break;
+		default:
+			que_number = 0;
+			break;
+	}
+	
+	if(current_que + 1 == que_number - 1)
+		alert('這是最後一題！');
+	else{
+		ans_showing = false;
+		current_que++;
+		refresh_img();
+	}
+}
+
+function refresh_img(){
+
+	var img1 = document.getElementById('img1');
+	var img2 = document.getElementById('img2');
+	var btn1 = document.getElementById('btn1');
+	var btn2 = document.getElementById('btn2');
+	var btn3 = document.getElementById('btn3');
+	var cell0 = document.getElementById('cell0');
+	
+	cell0.innerHTML = "<font size='5'>" + (current_que+1) + ". &nbsp </font>";
+	
+	var temp_string = "img/" + img_name_col[current_que] + "q.png";
+	img1.src = temp_string;
+	
+	temp_string = "img/" + img_name_col[current_que] + "a.png"
+	img2.src = temp_string;
+	
+	img2.style.display = ans_showing ? 'inline' : 'none'; // inline為display的預設語法 
+	
+	btn1.style.display = (current_que == 0) ? 'none' : 'inline';
+	
+	btn2.style.display = ans_showing ? 'none' : 'inline';
+	
+}
+
+function checkKey(e) { //網路上抄來的
+
+    e = e || window.event; // ||是什麼運算子?
+
+    if (e.keyCode == '38') {
+		// up arrow
+		pre_que();
+    }
+    else if (e.keyCode == '40') {
+        // down arrow
+		next_que();
+    }
+    else if (e.keyCode == '37') {
+		// left arrow
+		pre_que();
+    }
+    else if (e.keyCode == '39') {
+        // right arrow
+		if(!ans_showing)
+			show_ans();
+		else
+			next_que();
+    }
+
+}
+
+function show_test_UI(){
+	
+
+	is_ordered = document.test_metadata.radio_test_type[0].checked;
+
+	for (var i = 0 ; i < document.test_metadata.radio_test_set.length;i++) 
+		if (document.test_metadata.radio_test_set[i].checked) test_set = i ;
+	
+	create_img_col();	
+	
+	var list = document.getElementById('div_form');
+	
+	while (list.hasChildNodes()) 
+		list.removeChild(list.childNodes[0]);
+	
+	var img1 = document.createElement("img");
+	img1.id = 'img1';
+
+	var equ_img = document.createElement("img");
+	equ_img.id = 'equ_img';
+	equ_img.src = 'img/equ.png';
+	
+	var img2 = document.createElement("img");
+	img2.id = 'img2';
+
+	var tab = document.createElement("table");
+	var row1 = tab.insertRow();
+	
+	var cell0 = row1.insertCell(0)
+	cell0.id = 'cell0';
+	
+	var cell1 = row1.insertCell(1);
+	cell1.setAttribute('class','td_c');
+	
+	var cell2 = row1.insertCell(2);
+	cell2.id = 'cell_mid';
+	
+	var cell3 = row1.insertCell(3);
+	cell2.setAttribute('class','td_c');
+	
+	
+	
+	cell1.appendChild(img1);
+	cell2.appendChild(equ_img);
+	cell3.appendChild(img2);
+	
+	var div1 = document.createElement("div");
+	div1.appendChild(tab);
+	
+	var btn1 = document.createElement("button");
+	btn1.id = 'btn1';
+	btn1.setAttribute('onclick','pre_que()');
+	btn1.innerHTML = '上一題';
+	
+	var btn2 = document.createElement("button");
+	btn2.id = 'btn2';
+	btn2.setAttribute('onclick','show_ans()');
+	btn2.innerHTML = '看答案';
+	
+	var btn3 = document.createElement("button");
+	btn3.id = 'btn3';
+	btn3.setAttribute('onclick','next_que()');
+	btn3.innerHTML = '下一題';
+	
+	var div2 = document.createElement("div");
+	div2.appendChild(btn1);
+	div2.appendChild(btn2);
+	div2.appendChild(btn3);
+	
+	list.appendChild(div1);
+	list.appendChild(div2);
+	
+	refresh_img();
+	
+	document.onkeydown = checkKey;
+}
+
+</script>
+
+</head>
+<body>
+<div id="div_form">
+
+<h1> 微積分公式測驗系統 </h1>
+
+<form name="test_metadata" method='POST' > 
+
+<div id="div1">
+<input type='radio' name='radio_test_type' value='in_ordered' checked = "checked">　按照順序　
+<input type='radio' name='radio_test_type' value='random'>　隨機　
+<br>
+</div>
+
+<div id="div2">
+<input type='radio' name='radio_test_set' value='all' checked = "checked">　全部　
+<input type='radio' name='radio_test_set' value='diff'>　微分　
+<input type='radio' name='radio_test_set' value='inte'>　積分　
+<br><br>
+</div>
+
+<div id="div3">
+<input type="button" value="確定" onclick="show_test_UI()">
+</div>
+
+</form> 
+
+</div>
+</d>
+</html>
